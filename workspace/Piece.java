@@ -1,3 +1,10 @@
+/*
+ * Author: Jophie Chan
+ * Date: 03/06/2025
+ * Description: Here is where I created the legal moves my piece can move in and the controlled moves, which are how my piece
+ * can capture opponent pieces. 
+ */
+
 
 import java.awt.Graphics;
 import java.awt.Image;
@@ -10,120 +17,118 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-//you will need to implement two functions in this file.
+// The Piece class represents a chess piece and contains methods for piece behavior such as movement and control of squares.
 public class Piece {
-    private final boolean color;
-    private BufferedImage img;
-    
+    private final boolean color;  // The color of the piece (true for white, false for black)
+    private BufferedImage img;  // The image representing the piece
+
+    // Constructor to initialize the piece with a color and an image file
     public Piece(boolean isWhite, String img_file) {
         this.color = isWhite;
-        
+
         try {
             if (this.img == null) {
-              this.img = ImageIO.read(getClass().getResource(img_file));
+                // Load the image file for the piece using ImageIO
+                this.img = ImageIO.read(getClass().getResource(img_file));
             }
-          } catch (IOException e) {
+        } catch (IOException e) {
             System.out.println("File not found: " + e.getMessage());
-          }
+        }
     }
-    
-    
 
-    
+    // Getter for the color of the piece
     public boolean getColor() {
         return color;
     }
-    
+
+    // Getter for the image of the piece
     public Image getImage() {
         return img;
     }
-    
+
+    // Method to draw the piece on the given square using Graphics
     public void draw(Graphics g, Square currentSquare) {
-        int x = currentSquare.getX();
-        int y = currentSquare.getY();
-        
+        int x = currentSquare.getX();  // Get the x-coordinate of the square
+        int y = currentSquare.getY();  // Get the y-coordinate of the square
+
+        // Draw the piece's image on the board at the square's position
         g.drawImage(this.img, x, y, null);
     }
-    
-    
+
     // TO BE IMPLEMENTED!
-    //return a list of every square that is "controlled" by this piece. A square is controlled
-    //if the piece capture into it legally.
+    // This method returns a list of squares controlled by this piece.
+    // A square is controlled if the piece can legally capture into it.
     public ArrayList<Square> getControlledSquares(Square[][] board, Square start) {
-      ArrayList<Square> controlledSquares = new ArrayList<>();
-      
-      // Try all the directions this piece can control (2 squares in all directions)
-      int[][] directions = {{2, 0}, {0, 2}, {-2, 0}, {0, -2}, {2, 2}, {-2, -2}, {2, -2}, {-2, 2}};
-      
-      for (int[] direction : directions) {
-          int newRow = start.getRow() + direction[0];
-          int newCol = start.getCol() + direction[1];
-          
-          // Check if within bounds
-          if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-              Square targetSquare = board[newRow][newCol];
-              if (targetSquare.getOccupyingPiece() != null && targetSquare.getOccupyingPiece().getColor() != this.color) {
-                  controlledSquares.add(targetSquare);  // Opponent's piece is controlled
-              }
-          }
-      }
-      
-      return controlledSquares;
-  }
-    
+        ArrayList<Square> controlledSquares = new ArrayList<>();
 
-    //TO BE IMPLEMENTED!
-    //implement the move function here
-    //it's up to you how the piece moves, but at the very least the rules should be logical and it should never move off the board!
-    //returns an arraylist of squares which are legal to move to
-    //please note that your piece must have some sort of logic. Just being able to move to every square on the board is not
-    //going to score any points.
+        // Directions to check for controlled squares (2 squares in all directions: vertical, horizontal, and diagonal)
+        int[][] directions = {{2, 0}, {0, 2}, {-2, 0}, {0, -2}, {2, 2}, {-2, -2}, {2, -2}, {-2, 2}};
 
-    /*
-     * 1. My piece is called the Digger piece
-     * 2. It can move in any direction within two spaces (Vertically, Horizontally, and Diagonally)
-     * 3. If there is an opponent piece in the way of the move, the digger piece will take it and reach it's destination
-     * 4. If your own piece is in the way of the move, ignore the piece and reach it's destination
-     */
+        // Loop through each direction to check for controlled squares
+        for (int[] direction : directions) {
+            int newRow = start.getRow() + direction[0];  // New row after moving
+            int newCol = start.getCol() + direction[1];  // New column after moving
 
+            // Ensure the new position is within bounds of the board
+            if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+                Square targetSquare = board[newRow][newCol];
+                Piece targetPiece = targetSquare.getOccupyingPiece();
 
-    public ArrayList<Square> getLegalMoves(Board b, Square start) {
-      ArrayList<Square> legalMoves = new ArrayList<>();
-      Square[][] board = b.getSquareArray();
-      
-      // Try all the directions this piece can move (2 squares in all directions)
-      int[][] directions = {{2, 0}, {0, 2}, {-2, 0}, {0, -2}, {2, 2}, {-2, -2}, {2, -2}, {-2, 2}};
-      
-      for (int[] direction : directions) {
-        int newRow = start.getRow() + direction[0];
-        int newCol = start.getCol() + direction[1];
-      
-          // Check if within bounds
-          if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-            Square targetSquare = board[newRow][newCol];
-            Piece targetPiece = targetSquare.getOccupyingPiece();
-              
-              // If the target square is empty or contains an opponent's piece, it's a valid move
-              if (targetPiece == null || targetPiece.getColor() != this.color) {
-                legalMoves.add(targetSquare);
-                  
-                  // If there's an opponent's piece in the way, capture it and land on the next square
+                // If the target square has an opponent's piece, it's considered controlled
                 if (targetPiece != null && targetPiece.getColor() != this.color) {
-                  int landingRow = newRow + direction[0];
-                  int landingCol = newCol + direction[1];
-                      
-                  if (landingRow >= 0 && landingRow < 8 && landingCol >= 0 && landingCol < 8) {
-                    Square landingSquare = board[landingRow][landingCol];
-                      // Ensure landing square is empty
-                      if (landingSquare.getOccupyingPiece() == null) {
-                        legalMoves.add(landingSquare);  // Capture the opponent's piece and move to the next square
-                      }
-                  }
+                    controlledSquares.add(targetSquare);  // Opponent's piece is controlled
                 }
-              }
-          }
-      }
-      
-      return legalMoves;
-  }
+            }
+        }
+
+        // Return the list of controlled squares
+        return controlledSquares;
+    }
+
+    // TO BE IMPLEMENTED!
+    // This method returns a list of legal moves for the piece, taking into account the rules of movement.
+    // A legal move is defined by whether the piece can move to that square within the bounds of the board.
+    public ArrayList<Square> getLegalMoves(Board b, Square start) {
+        ArrayList<Square> legalMoves = new ArrayList<>();
+        Square[][] board = b.getSquareArray();  // Get the array of squares representing the board
+
+        // Directions to check for legal moves (2 squares in all directions: vertical, horizontal, and diagonal)
+        int[][] directions = {{2, 0}, {0, 2}, {-2, 0}, {0, -2}, {2, 2}, {-2, -2}, {2, -2}, {-2, 2}};
+
+        // Loop through each direction to check for legal moves
+        for (int[] direction : directions) {
+            int newRow = start.getRow() + direction[0];  // New row after moving
+            int newCol = start.getCol() + direction[1];  // New column after moving
+
+            // Ensure the new position is within bounds of the board
+            if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+                Square targetSquare = board[newRow][newCol];  // Get the target square
+                Piece targetPiece = targetSquare.getOccupyingPiece();  // Get the piece occupying the target square
+
+                // If the target square is empty or contains an opponent's piece, it's a valid move
+                if (targetPiece == null || targetPiece.getColor() != this.color) {
+                    legalMoves.add(targetSquare);  // Add to legal moves list
+
+                    // If there's an opponent's piece in the way, capture it and move to the next square
+                    if (targetPiece != null && targetPiece.getColor() != this.color) {
+                        int landingRow = newRow + direction[0];  // Calculate the landing square row
+                        int landingCol = newCol + direction[1];  // Calculate the landing square column
+
+                        // Ensure the landing square is within bounds and empty
+                        if (landingRow >= 0 && landingRow < 8 && landingCol >= 0 && landingCol < 8) {
+                            Square landingSquare = board[landingRow][landingCol];
+
+                            // If the landing square is empty, add it to the legal moves list
+                            if (landingSquare.getOccupyingPiece() == null) {
+                                legalMoves.add(landingSquare);  // Capture the opponent's piece and move to the next square
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Return the list of legal moves
+        return legalMoves;
+    }
 }
