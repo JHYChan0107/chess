@@ -70,7 +70,7 @@ public class Piece {
             int newCol = start.getCol() + direction[1];  // New column after moving
 
             // Ensure the new position is within bounds of the board
-            if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+            if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) { 
                 Square targetSquare = board[newRow][newCol];
                 Piece targetPiece = targetSquare.getOccupyingPiece();
 
@@ -88,6 +88,12 @@ public class Piece {
     // TO BE IMPLEMENTED!
     // This method returns a list of legal moves for the piece, taking into account the rules of movement.
     // A legal move is defined by whether the piece can move to that square within the bounds of the board.
+
+
+    //MY PIECE'S MOVEMENTS
+    //Moves within two spaces
+    //If there is a opponent piece in the way, it will take it and reach it's destination
+    //If your own piece is in the way, ignore it and reach it's destination
     public ArrayList<Square> getLegalMoves(Board b, Square start) {
         ArrayList<Square> legalMoves = new ArrayList<>();
         Square[][] board = b.getSquareArray();  // Get the array of squares representing the board
