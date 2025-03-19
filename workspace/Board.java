@@ -49,7 +49,7 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
     private boolean whiteTurn;
 
     // The current piece being dragged by the player
-    private Piece currPiece;
+    private Digger currPiece;
     
     // The square from which the piece was moved
     private Square fromMoveSquare;
@@ -89,33 +89,33 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
     // Set up the initial positions of the pieces for both players
     private void initializePieces() {
         // White pieces
-        board[0][0].put(new Piece(true, RESOURCES_WROOK_PNG));
-        board[0][1].put(new Piece(true, RESOURCES_WDIG_PNG));   // My Piece (this is a custom piece)
-        board[0][2].put(new Piece(true, RESOURCES_WBISHOP_PNG));
-        board[0][3].put(new Piece(true, RESOURCES_WQUEEN_PNG));
-        board[0][4].put(new Piece(true, RESOURCES_WKING_PNG));
-        board[0][5].put(new Piece(true, RESOURCES_WBISHOP_PNG));
-        board[0][6].put(new Piece(true, RESOURCES_WDIG_PNG));   // My Piece (this is a custom piece)
-        board[0][7].put(new Piece(true, RESOURCES_WROOK_PNG));
+        board[0][0].put(new Digger(true, RESOURCES_WROOK_PNG));
+        board[0][1].put(new Digger(true, RESOURCES_WDIG_PNG));   // My Piece (this is a custom piece)
+        board[0][2].put(new Digger(true, RESOURCES_WBISHOP_PNG));
+        board[0][3].put(new Digger(true, RESOURCES_WQUEEN_PNG));
+        board[0][4].put(new Digger(true, RESOURCES_WKING_PNG));
+        board[0][5].put(new Digger(true, RESOURCES_WBISHOP_PNG));
+        board[0][6].put(new Digger(true, RESOURCES_WDIG_PNG));   // My Piece (this is a custom piece)
+        board[0][7].put(new Digger(true, RESOURCES_WROOK_PNG));
 
         // Place white pawns
         for (int i = 0; i < 8; i++) {
-            board[1][i].put(new Piece(true, RESOURCES_WPAWN_PNG));
+            board[1][i].put(new Digger(true, RESOURCES_WPAWN_PNG));
         }
 
         // Black pieces
-        board[7][0].put(new Piece(false, RESOURCES_BROOK_PNG));
-        board[7][1].put(new Piece(false, RESOURCES_BDIG_PNG));   // My Piece (this is a custom piece)
-        board[7][2].put(new Piece(false, RESOURCES_BBISHOP_PNG));
-        board[7][3].put(new Piece(false, RESOURCES_BQUEEN_PNG));
-        board[7][4].put(new Piece(false, RESOURCES_BKING_PNG));
-        board[7][5].put(new Piece(false, RESOURCES_BBISHOP_PNG));
-        board[7][6].put(new Piece(false, RESOURCES_BDIG_PNG));   // My Piece (this is a custom piece)
-        board[7][7].put(new Piece(false, RESOURCES_BROOK_PNG));
+        board[7][0].put(new Digger(false, RESOURCES_BROOK_PNG));
+        board[7][1].put(new Digger(false, RESOURCES_BDIG_PNG));   // My Piece (this is a custom piece)
+        board[7][2].put(new Digger(false, RESOURCES_BBISHOP_PNG));
+        board[7][3].put(new Digger(false, RESOURCES_BQUEEN_PNG));
+        board[7][4].put(new Digger(false, RESOURCES_BKING_PNG));
+        board[7][5].put(new Digger(false, RESOURCES_BBISHOP_PNG));
+        board[7][6].put(new Digger(false, RESOURCES_BDIG_PNG));   // My Piece (this is a custom piece)
+        board[7][7].put(new Digger(false, RESOURCES_BROOK_PNG));
 
         // Place black pawns
         for (int i = 0; i < 8; i++) {
-            board[6][i].put(new Piece(false, RESOURCES_BPAWN_PNG));
+            board[6][i].put(new Digger(false, RESOURCES_BPAWN_PNG));
         }
     }
 
@@ -130,12 +130,12 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
     }
 
     // Set the current piece being dragged
-    public void setCurrPiece(Piece p) {
+    public void setCurrPiece(Digger p) {
         this.currPiece = p;
     }
 
     // Get the current piece being dragged
-    public Piece getCurrPiece() {
+    public Digger getCurrPiece() {
         return this.currPiece;
     }
 
@@ -214,7 +214,7 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
 
             if (legalMoves.contains(endSquare)) {  // Check if the move is legal
                 if (endSquare.isOccupied()) {  // Handle capturing opponent pieces
-                    Piece capturedPiece = endSquare.getOccupyingPiece();
+                    Digger capturedPiece = endSquare.getOccupyingPiece();
                     if (capturedPiece.getColor() != currPiece.getColor()) {
                         endSquare.removePiece();  // Remove captured piece
                     } else {
