@@ -89,33 +89,33 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
     // Set up the initial positions of the pieces for both players
     private void initializePieces() {
         // White pieces
-        board[0][0].put(new Digger(true, RESOURCES_WROOK_PNG));
-        board[0][1].put(new Digger(true, RESOURCES_WDIG_PNG));   // My Piece (this is a custom piece)
-        board[0][2].put(new Digger(true, RESOURCES_WBISHOP_PNG));
-        board[0][3].put(new Digger(true, RESOURCES_WQUEEN_PNG));
-        board[0][4].put(new Digger(true, RESOURCES_WKING_PNG));
-        board[0][5].put(new Digger(true, RESOURCES_WBISHOP_PNG));
-        board[0][6].put(new Digger(true, RESOURCES_WDIG_PNG));   // My Piece (this is a custom piece)
-        board[0][7].put(new Digger(true, RESOURCES_WROOK_PNG));
+        board[0][0].put(new Rook(false, RESOURCES_BROOK_PNG));
+        board[0][1].put(new Digger(false, RESOURCES_BDIG_PNG));   // My Piece (this is a custom piece)
+        board[0][2].put(new Bishop(false, RESOURCES_BBISHOP_PNG));
+        board[0][3].put(new Queen(false, RESOURCES_BQUEEN_PNG));
+        board[0][4].put(new King(false, RESOURCES_BKING_PNG));
+        board[0][5].put(new Bishop(false, RESOURCES_BBISHOP_PNG));
+        board[0][6].put(new Digger(false, RESOURCES_BDIG_PNG));   // My Piece (this is a custom piece)
+        board[0][7].put(new Rook(false, RESOURCES_BROOK_PNG));
 
         // Place white pawns
         for (int i = 0; i < 8; i++) {
-            board[1][i].put(new Digger(true, RESOURCES_WPAWN_PNG));
+            board[1][i].put(new Pawn(false, RESOURCES_BPAWN_PNG));
         }
 
         // Black pieces
-        board[7][0].put(new Digger(false, RESOURCES_BROOK_PNG));
-        board[7][1].put(new Digger(false, RESOURCES_BDIG_PNG));   // My Piece (this is a custom piece)
-        board[7][2].put(new Digger(false, RESOURCES_BBISHOP_PNG));
-        board[7][3].put(new Digger(false, RESOURCES_BQUEEN_PNG));
-        board[7][4].put(new Digger(false, RESOURCES_BKING_PNG));
-        board[7][5].put(new Digger(false, RESOURCES_BBISHOP_PNG));
-        board[7][6].put(new Digger(false, RESOURCES_BDIG_PNG));   // My Piece (this is a custom piece)
-        board[7][7].put(new Digger(false, RESOURCES_BROOK_PNG));
+        board[7][0].put(new Rook(true, RESOURCES_WROOK_PNG));
+        board[7][1].put(new Digger(true, RESOURCES_WDIG_PNG));   // My Piece (this is a custom piece)
+        board[7][2].put(new Bishop(true, RESOURCES_WBISHOP_PNG));
+        board[7][3].put(new Queen(true, RESOURCES_WQUEEN_PNG));
+        board[7][4].put(new King(true, RESOURCES_WKING_PNG));
+        board[7][5].put(new Bishop(true, RESOURCES_WBISHOP_PNG));
+        board[7][6].put(new Digger(true, RESOURCES_WDIG_PNG));   // My Piece (this is a custom piece)
+        board[7][7].put(new Rook(true, RESOURCES_WROOK_PNG));
 
         // Place black pawns
         for (int i = 0; i < 8; i++) {
-            board[6][i].put(new Digger(false, RESOURCES_BPAWN_PNG));
+            board[6][i].put(new Pawn(true, RESOURCES_WPAWN_PNG));
         }
     }
 
@@ -211,6 +211,7 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
         // If the piece and the fromSquare are valid, proceed with the move
         if (currPiece != null && fromMoveSquare != null) {
             ArrayList<Square> legalMoves = currPiece.getLegalMoves(this, fromMoveSquare);
+            
 
             if (legalMoves.contains(endSquare)) {  // Check if the move is legal
                 if (endSquare.isOccupied()) {  // Handle capturing opponent pieces
@@ -226,6 +227,35 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
                 // Move the piece to the new square
                 endSquare.put(currPiece);
                 fromMoveSquare.removePiece();  // Clear the original square
+
+                boolean After = isInCheck(whiteTurn);
+                if(After) {
+                    endSquare.removePiece();
+                    fromMoveSquare.put(currPiece);
+                    repaint();
+                    return;
+                }
+
+                // Check if the player was in check at the start of the turn
+            if (isInCheck(whiteTurn)) {
+                // If the player is in check at the start, ensure the move gets them out of check
+                boolean isCheckmate = true;
+                for (Square s : currPiece.getLegalMoves(this, fromMoveSquare)) {
+                    if (!isInCheck(whiteTurn)) {
+                        isCheckmate = false;
+                        break;
+                    }
+                }
+
+                if (isCheckmate) {
+                    // If no move can get the player out of check, cancel the move
+                    fromMoveSquare.put(currPiece);
+                    endSquare.removePiece();
+                    resetMove();
+                    return;
+                }
+            }
+
                 whiteTurn = !whiteTurn;  // Switch turns
             }
         }
@@ -245,13 +275,53 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
             }
 
             // Highlight squares controlled by the piece in blue
-            for (Square s1 : currPiece.getControlledSquares(board, fromMoveSquare)) {
+            for (Square s1 : currPiece.getControlledSquares(board, fromMoveSquare)) { 
                 s1.setBorder(BorderFactory.createLineBorder(Color.blue));
             }
         }
 
         repaint();
     }
+
+    //precondition - the board is initialized and contains a king of either color. The boolean kingColor corresponds to the color of the king we wish to know the status of.
+    //postcondition - returns true of the king is in check and false otherwise.
+	public boolean isInCheck(boolean kingColor) {
+        // Find the king of the specified color
+        Square kingSquare = null;
+        Boolean check = true;
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Piece piece = board[r][c].getOccupyingPiece();
+                if (piece instanceof King && piece.getColor() == kingColor) {
+                    kingSquare = board[r][c];  // Found the king's square
+                    break;
+                }
+            }
+            if (kingSquare != null) break;  // Exit outer loop once king is found
+        }
+    
+        // If no king is found, return false (this should never happen in a valid game)
+        if (kingSquare == null) return false;
+    
+        // Now check if any piece of the opposite color can attack the king
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Piece piece = board[r][c].getOccupyingPiece();
+                if (piece != null && piece.getColor() != kingColor) {
+                    // Check if this piece can control the king's square
+                    List<Square> controlledSquares = piece.getControlledSquares(board, board[r][c]);
+                    if (controlledSquares.contains(kingSquare)) {
+                        return true;  // The king is in check
+                    }
+                }
+            }
+        }
+        
+        System.out.println(check);
+        return false;  // The king is not in check
+    }
+    
+    
 
     @Override
     public void mouseMoved(MouseEvent e) {

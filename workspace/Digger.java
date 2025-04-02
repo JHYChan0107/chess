@@ -3,6 +3,11 @@
  * Date: 03/06/2025
  * Description: Here is where I created the legal moves my piece can move in and the controlled moves, which are how my piece
  * can capture opponent pieces. 
+ * 
+ * //MY PIECE'S MOVEMENTS
+    //Moves within two spaces
+    //If there is a opponent piece in the way, it will take it and reach it's destination
+    //If your own piece is in the way, ignore it and reach it's destination    
  */
 
 
